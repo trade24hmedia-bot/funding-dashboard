@@ -1,10 +1,15 @@
 {
-  "generated_at": "2026-07-21T14:00:00+00:00",
-  "params": {"normalize_hours":4,"threshold_pct":0.25,"round_trip_pct":0.24,"hold_periods":1,"fill_mode":"taker","min_spot_vol_usdt":1000000,"min_pct_positive":0.6},
-  "count_total": 1432,
-  "count_opportunities": 2,
-  "rows": [
-    {"exchange":"okx","orig_symbol":"WIN-USDT-SWAP","rate_pct":0.31,"interval_h":4,"rate_norm_pct":0.31,"funding_min_hold_pct":0.31,"round_trip_pct":0.24,"net_pct":0.07,"break_even_periods":1,"daily_yield_pct":1.86,"avg_7d_pct":0.28,"pct_positive_7d":0.83,"spot_vol_usdt":4200000,"next_funding":"2026-07-21 16:00 UTC","next_ms":1900000000000},
-    {"exchange":"bybit","orig_symbol":"MEMEUSDT","rate_pct":0.55,"interval_h":8,"rate_norm_pct":0.275,"funding_min_hold_pct":0.55,"round_trip_pct":0.24,"net_pct":0.31,"break_even_periods":1,"daily_yield_pct":1.65,"avg_7d_pct":0.41,"pct_positive_7d":0.71,"spot_vol_usdt":18500000,"next_funding":"2026-07-21 16:00 UTC","next_ms":1900000000000}
-  ]
+  "generated_at": "2026-07-21T14:57:52.208566+00:00",
+  "params": {
+    "normalize_hours": 4,
+    "threshold_pct": 0.25,
+    "round_trip_pct": 0.24,
+    "hold_periods": 1,
+    "fill_mode": "taker",
+    "min_spot_vol_usdt": 1000000,
+    "min_pct_positive": 0.6
+  },
+  "count_total": 1285,
+  "count_opportunities": 0,
+  "rows": []
 }
