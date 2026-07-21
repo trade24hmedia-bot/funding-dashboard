@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funding Scanner — CryptoZoom</title>
+<style>
+  :root{
+    --bg:#0e1420; --panel:#161f2e; --panel2:#1b2740; --line:#23304a;
+    --txt:#d7e0ee; --muted:#7d8ba3; --pos:#3ddc97; --accent:#5b8cff;
+    --warn:#ffb454; --urgent:#ff6b6b;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);
+       font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+
+  header{padding:22px 20px 14px;border-bottom:1px solid var(--line);
+         display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px}
+  header h1{margin:0;font-size:18px;font-weight:650;letter-spacing:.2px}
+  header h1 span{color:var(--pos)}
+  .sub{color:var(--muted);font-size:12.5px}
+  .meta{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+  .meta b{color:var(--txt);font-weight:600}
+
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 20px;
+       border-bottom:1px solid var(--line);background:var(--panel)}
+  .bar input,.bar select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+       padding:7px 10px;border-radius:7px;font-size:13px;font-family:var(--sans);outline:none}
+  .bar input:focus,.bar select:focus{border-color:var(--accent)}
+  .chip{font-family:var(--mono);font-size:12px;color:var(--muted);
+        background:var(--panel2);border:1px solid var(--line);padding:5px 9px;border-radius:6px}
+  .chip b{color:var(--pos)}
+
+  .wrap{overflow-x:auto;padding:4px 0 40px}
+  table{border-collapse:collapse;width:100%;min-width:940px}
+  thead th{position:sticky;top:0;background:var(--bg);z-index:2;text-align:right;
+    font-size:11.5px;font-weight:600;letter-spacing:.3px;color:var(--muted);text-transform:uppercase;
+    padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+  thead th:first-child,thead th:nth-child(2){text-align:left}
+  thead th:hover{color:var(--txt)}
+  thead th.act{color:var(--txt)}
+  thead th .ar{opacity:.55;font-size:10px}
+  tbody td{padding:10px 12px;text-align:right;border-bottom:1px solid #1a2337;
+    font-family:var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+  tbody td.sym{text-align:left;font-family:var(--sans);font-weight:600}
+  tbody td.exch{text-align:left}
+  tbody tr:hover{background:#131c2c}
+  .exbadge{font-size:11px;font-family:var(--sans);padding:2px 7px;border-radius:5px;
+    border:1px solid var(--line);color:var(--txt);background:var(--panel2)}
+  .pos{color:var(--pos)} .neg{color:var(--urgent)} .dim{color:var(--muted)}
+  .cd{font-weight:600}
+  .cd.soon{color:var(--warn)} .cd.now{color:var(--urgent)}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+  .empty b{color:var(--txt)}
+  footer{padding:16px 20px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+  .note{max-width:820px}
+  @media(max-width:560px){
+    .meta{margin-left:0;text-align:left;width:100%}
+    header{padding:16px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Funding Scanner <span>·</span> CryptoZoom</h1>
+  <div class="sub">Cơ hội săn phí funding delta-neutral — funding dương thì SHORT perp + LONG spot</div>
+  <div class="meta" id="meta">đang tải…</div>
+</header>
+
+<div class="bar">
+  <input id="q" placeholder="Tìm cặp… (vd BTC)" autocomplete="off">
+  <select id="ex">
+    <option value="">Tất cả sàn</option>
+    <option value="binance">Binance</option>
+    <option value="bybit">Bybit</option>
+    <option value="okx">OKX</option>
+    <option value="bingx">BingX</option>
+  </select>
+  <span class="chip" id="c1">—</span>
+  <span class="chip" id="c2">—</span>
+</div>
+
+<div class="wrap">
+  <table id="tbl">
+    <thead><tr id="hrow"></tr></thead>
+    <tbody id="body"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none"></div>
+</div>
+
+<footer>
+  <div class="note">
+    <b>Cách đọc:</b> <span class="dim">Rate/kỳ</span> = funding thô mỗi lần chốt trên chính sàn đó.
+    <span class="dim">Rate {NH}h</span> = quy về mốc {NH} giờ để so sánh công bằng giữa các kỳ khác nhau.
+    <span class="dim">Net%</span> = funding thu về (giữ {HP} kỳ) trừ phí round-trip {RT}%.
+    <span class="dim">BE</span> = số kỳ tối thiểu để hòa phí. <span class="dim">%kỳ+ 7d</span> = độ ổn định (tỷ lệ kỳ dương 7 ngày qua).
+    <span class="dim">Kết thúc kỳ</span> chuyển <span style="color:var(--warn)">vàng</span> khi &lt;15 phút, <span style="color:var(--urgent)">đỏ</span> khi &lt;5 phút.
+    <br>Dữ liệu chỉ tham khảo, không phải khuyến nghị đầu tư. Funding có thể đảo dấu ngay trước giờ chốt.
+  </div>
+</footer>
+
+<script>
+const COLS = [
+  {k:"exchange", t:"Sàn", cls:"exch"},
+  {k:"orig_symbol", t:"Cặp", cls:"sym"},
+  {k:"rate_pct", t:"Rate/kỳ %", fmt:pct},
+  {k:"interval_h", t:"Kỳ (h)", fmt:v=>v==null?"—":(+v).toFixed(v%1?1:0)},
+  {k:"rate_norm_pct", t:"Rate 4h %", fmt:pct},
+  {k:"net_pct", t:"Net %", fmt:pct, signed:true},
+  {k:"break_even_periods", t:"BE (kỳ)", fmt:v=>v==null?"—":(v===null||!isFinite(v)?"∞":v)},
+  {k:"daily_yield_pct", t:"Yield/ngày %", fmt:pct},
+  {k:"avg_7d_pct", t:"TB 7d %", fmt:pct, signed:true},
+  {k:"pct_positive_7d", t:"%kỳ+ 7d", fmt:v=>v==null?"—":(v*100).toFixed(0)+"%"},
+  {k:"spot_vol_usdt", t:"Vol Spot", fmt:vol},
+  {k:"next_ms", t:"Kết thúc kỳ", fmt:null, cd:true},
+];
+let DATA=[], sortKey="net_pct", sortDir=-1;
+
+function pct(v){ if(v==null) return "—"; return (+v).toFixed(4); }
+function vol(v){ if(v==null) return "—"; v=+v;
+  if(v>=1e9) return (v/1e9).toFixed(2)+"B"; if(v>=1e6) return (v/1e6).toFixed(2)+"M";
+  if(v>=1e3) return (v/1e3).toFixed(1)+"K"; return v.toFixed(0); }
+function exBadge(e){ return `<span class="exbadge">${e}</span>`; }
+
+function fmtCountdown(ms){
+  if(!ms) return {txt:"—", cls:""};
+  let d = ms - Date.now();
+  if(d<=0) return {txt:"đang chốt…", cls:"now"};
+  const h=Math.floor(d/3.6e6), m=Math.floor(d%3.6e6/6e4), s=Math.floor(d%6e4/1e3);
+  const txt = (h>0? h+"h ":"") + m+"m "+s+"s";
+  const cls = d<3e5 ? "now" : (d<9e5 ? "soon" : "");
+  return {txt, cls};
+}
+
+function render(){
+  const q=document.getElementById("q").value.trim().toUpperCase();
+  const ex=document.getElementById("ex").value;
+  let rows = DATA.filter(r=>(!ex||r.exchange===ex) && (!q||(r.orig_symbol||"").toUpperCase().includes(q)));
+  rows.sort((a,b)=>{
+    let x=a[sortKey], y=b[sortKey];
+    x=(x==null||x===Infinity)?-1e18:x; y=(y==null||y===Infinity)?-1e18:y;
+    if(typeof x==="string") return sortDir*x.localeCompare(y);
+    return sortDir*(x-y);
+  });
+
+  const body=document.getElementById("body"), empty=document.getElementById("empty");
+  if(rows.length===0){
+    body.innerHTML=""; empty.style.display="block";
+    empty.innerHTML = DATA.length===0
+      ? "<b>Chưa có cơ hội nào đạt điều kiện ở lần cập nhật gần nhất.</b><br>Bộ lọc đang chặt — thử nới ngưỡng trong cấu hình scanner."
+      : "Không có cặp khớp bộ lọc hiện tại.";
+    return;
+  }
+  empty.style.display="none";
+  body.innerHTML = rows.map(r=>"<tr>"+COLS.map(c=>{
+    if(c.cd){ const cd=fmtCountdown(r.next_ms);
+      const title=r.next_funding?` title="${r.next_funding}"`:"";
+      return `<td class="cd ${cd.cls}"${title} data-cd="${r.next_ms||0}">${cd.txt}</td>`; }
+    let v=r[c.k], out=c.fmt?c.fmt(v):v;
+    let cls=c.cls||"";
+    if(c.signed && v!=null) cls+= (v>0?" pos":(v<0?" neg":""));
+    if(c.k==="exchange") out=exBadge(v);
+    if(c.k==="rate_pct" && v!=null) cls+=" pos";
+    return `<td class="${cls}">${out}</td>`;
+  }).join("")+"</tr>").join("");
+}
+
+function tickCountdowns(){
+  document.querySelectorAll("td.cd").forEach(td=>{
+    const ms=+td.dataset.cd; const cd=fmtCountdown(ms);
+    td.textContent=cd.txt; td.className="cd "+cd.cls;
+  });
+}
+
+function buildHead(){
+  const hrow=document.getElementById("hrow");
+  hrow.innerHTML=COLS.map(c=>{
+    const act=c.k===sortKey; const ar=act?(sortDir<0?"▼":"▲"):"";
+    return `<th data-k="${c.k}" class="${act?'act':''}">${c.t} <span class="ar">${ar}</span></th>`;
+  }).join("");
+  hrow.querySelectorAll("th").forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k;
+    if(k===sortKey) sortDir*=-1; else {sortKey=k; sortDir=-1;}
+    buildHead(); render();
+  });
+}
+
+let FOOT_TPL = null;
+async function load(){
+  try{
+    const res=await fetch("data.json?_="+Date.now());
+    if(!res.ok) throw new Error("no data");
+    const d=await res.json();
+    DATA=d.rows||[];
+    const p=d.params||{}, NH=p.normalize_hours??4, HP=p.hold_periods??1, RT=p.round_trip_pct??"";
+
+    COLS.find(c=>c.k==="rate_norm_pct").t = "Rate "+NH+"h %";
+    buildHead();
+
+    const note=document.querySelector(".note");
+    if(FOOT_TPL===null) FOOT_TPL=note.innerHTML;      // giữ template gốc, điền tham số mỗi lần
+    note.innerHTML=FOOT_TPL.replace(/\{NH\}/g,NH).replace(/\{HP\}/g,HP).replace(/\{RT\}/g,RT);
+
+    const gen=new Date(d.generated_at);
+    document.getElementById("meta").innerHTML =
+      `cập nhật: <b>${gen.toISOString().slice(0,16).replace("T"," ")} UTC</b> · tự làm mới mỗi giờ`;
+    document.getElementById("c1").innerHTML = `cơ hội: <b>${d.count_opportunities??0}</b>`;
+    document.getElementById("c2").innerHTML = `quét <b>${d.count_total??0}</b> cặp · ngưỡng ${p.threshold_pct}%/${NH}h`;
+    render();
+  }catch(e){
+    document.getElementById("meta").textContent="chưa tải được data.json";
+    document.getElementById("body").innerHTML="";
+    const empty=document.getElementById("empty");
+    empty.style.display="block";
+    empty.innerHTML="<b>Chưa có dữ liệu.</b><br>GitHub Actions sẽ tạo <code>data.json</code> ở lần chạy đầu tiên (hoặc bấm Run workflow).";
+  }
+}
+document.getElementById("q").oninput=render;
+document.getElementById("ex").onchange=render;
+buildHead();
+load();
+setInterval(tickCountdowns,1000);
+setInterval(load, 5*60*1000); // tự fetch lại mỗi 5 phút để bắt bản cập nhật mới
+</script>
+</body>
+</html>
