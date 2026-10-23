@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T19:02:02.827824+00:00",
+  "generated_at": "2026-10-23T23:00:21.015568+00:00",
   "params": {
     "normalize_hours": 4,
     "threshold_pct": 0.25,
@@ -9,42 +9,7 @@
     "min_spot_vol_usdt": 1000000,
     "min_pct_positive": 0.6
   },
-  "count_total": 1722,
-  "count_opportunities": 2,
-  "rows": [
-    {
-      "exchange": "okx",
-      "orig_symbol": "IRYS-USDT-SWAP",
-      "rate_pct": 0.74917126736116,
-      "interval_h": 4,
-      "rate_norm_pct": 0.74917126736116,
-      "funding_min_hold_pct": 0.74917126736116,
-      "round_trip_pct": 0.24000000000000002,
-      "net_pct": 0.50917126736116,
-      "break_even_periods": 1.0,
-      "daily_yield_pct": 4.49502760416696,
-      "avg_7d_pct": -0.0017533103451489,
-      "pct_positive_7d": 0.9,
-      "spot_vol_usdt": 67951503.64519,
-      "next_funding": "2026-10-24 00:00 UTC",
-      "next_ms": 1792800000000
-    },
-    {
-      "exchange": "bingx",
-      "orig_symbol": "IRYS-USDT",
-      "rate_pct": 0.5634,
-      "interval_h": 8,
-      "rate_norm_pct": 0.2817,
-      "funding_min_hold_pct": 0.5634,
-      "round_trip_pct": 0.24000000000000002,
-      "net_pct": 0.3234,
-      "break_even_periods": 1.0,
-      "daily_yield_pct": 1.6902,
-      "avg_7d_pct": 0.0127699,
-      "pct_positive_7d": 0.97,
-      "spot_vol_usdt": 2919279.62,
-      "next_funding": "2026-10-23 20:00 UTC",
-      "next_ms": 1792785600000
-    }
-  ]
+  "count_total": 1442,
+  "count_opportunities": 0,
+  "rows": []
 }
