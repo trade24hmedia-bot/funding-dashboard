@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-25T22:19:39.050120+00:00",
+  "generated_at": "2026-11-26T04:51:53.400827+00:00",
   "params": {
     "normalize_hours": 4,
     "threshold_pct": 0.25,
@@ -9,7 +9,7 @@
     "min_spot_vol_usdt": 1000000,
     "min_pct_positive": 0.6
   },
-  "count_total": 1457,
+  "count_total": 1477,
   "count_opportunities": 0,
   "rows": []
 }
